@@ -25,19 +25,18 @@ describe("/readers", () => {
       const response = await request(app).post("/readers").send({
         name: "Beverley James",
         email: "beverleyjames@iamanemail.com",
+        password: "iamasecretpassword2!"
       });
 
       await expect(response.status).to.equal(201);
 
       expect(response.body.name).to.equal("Beverley James");
 
-      const insertedReaderRecords = await Reader.findByPk(response.body.id, {
-        raw: true,
-      });
+      const insertedReaderRecords = await Reader.findByPk(response.body.id, {raw: true,});
+
       expect(insertedReaderRecords.name).to.equal("Beverley James");
-      expect(insertedReaderRecords.email).to.equal(
-        "beverleyjames@iamanemail.com"
-      );
+      expect(insertedReaderRecords.email).to.equal("beverleyjames@iamanemail.com");
+      expect(insertedReaderRecords.password).to.equal("iamasecretpassword2!");
     });
     done(); // Is this needed?
   });
@@ -48,15 +47,18 @@ describe("/readers", () => {
       Promise.all([
         Reader.create({
           name: 'Beverley James',
-          email: 'beverleyjames@iamanemail.com'
+          email: 'beverleyjames@iamanemail.com',
+          password: 'iamasecretpassword2!'
         }),
         Reader.create({
           name: 'Audrey Wellington',
-          email: 'audreywellington@iamanemail.com'
+          email: 'audreywellington@iamanemail.com',
+          password: 'iamanothersecretpassword1!'
         }),
         Reader.create({
           name: 'Iris Findlay',
-          email: 'irisfindlay@iamanemail.com'
+          email: 'irisfindlay@iamanemail.com',
+          password: 'yetagainasecretpassword56!'
         }),
       ]).then((documents) => {
         readers = documents;
@@ -72,9 +74,10 @@ describe("/readers", () => {
             expect(res.status).to.equal(200);
             expect(res.body.length).to.equal(3);
             res.body.forEach((reader) => {
-              const expected = readers.find((a) => a.id === reader.id);
-              expect(reader.name).to.equal(expected.name);
+              const expected = readers.find((a) => a.id === reader.id); // What exactly does this line mean?
+              expect(reader.name).to.equal(expected.name); // Also where does 'reader' come from? Where have we defined it? Is it a form of 'Reader'?
               expect(reader.email).to.equal(expected.email);
+              expect(reader.password).to.equal(expected.password);
             });
             done();
           })
@@ -82,15 +85,16 @@ describe("/readers", () => {
       });
     });
 
-    describe("GET /readers/:readerId", () => {
+    describe("GET /readers/:id", () => {
       it("gets reader record by id", (done) => {
-        const reader = readers[0];
+        const reader = readers[0]; // Here we have 'reader' defined, but not above.. why?
         request(app)
           .get(`/readers/${reader.id}`)
           .then((res) => {
             expect(res.status).to.equal(200);
             expect(res.body.name).to.equal(reader.name);
             expect(res.body.email).to.equal(reader.email);
+            expect(res.body.password).to.equal(reader.password);
             done();
           })
           .catch((error) => done(error));
@@ -137,6 +141,20 @@ describe("/readers", () => {
           .catch(error => done(error));
         });
       });
+      it('updates reader password by id', (done) => {
+        const reader = readers[0];
+        request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({ password: 'iamevenmoresecretnow!' })
+        .then((res) => {
+          expect(res.status).to.equal(200);
+          Reader.findByPk(reader.id, { raw: true }).then((readerUpdated) => {
+            expect(readerUpdated.password).to.equal('iamevenmoresecretnow!');
+            done();
+          })
+          .catch(error => done(error));
+        });
+      });
       it('returns a 404 if the reader does not exist', (done) => {
         request(app)
         .get('/readers/12345')
@@ -165,7 +183,7 @@ describe("/readers", () => {
       });
       it('returns a 404 if the reader does not exist', (done) => {
         request(app)
-        .get('/readers/12345') // Why is this a .get and not .delete?
+        .delete('/readers/12345') // Why is this a .get and not .delete?
         .then((res) => {
           expect(res.status).to.equal(404);
           expect(res.body.error).to.equal('The reader could not be found.');

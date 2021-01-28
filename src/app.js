@@ -1,22 +1,13 @@
 const express = require('express');
+const readerRouter = require('./routes/reader');
+const bookRouter = require('./routes/book');
 
 const app = express();
 
-const readerControllers = require('./controllers/readers');
-
 app.use(express.json());
 
-// Reader section
+app.use('/readers', readerRouter);
 
-app.post('/readers', readerControllers.create);
-
-app.get('/readers', readerControllers.list);
-
-app.get('/readers/:readerId', readerControllers.getReaderById);
-
-app.patch('/readers/:id', readerControllers.updatedReader);
-
-app.delete('/readers/:id', readerControllers.deletedReader);
-
+app.use('/books', bookRouter);
 
 module.exports = app;
