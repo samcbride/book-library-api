@@ -3,10 +3,10 @@ const { Reader } = require("../models");
 const createReader = (req, res) => {
     Reader.create(req.body)
         .then((reader) => res.status(201).json(reader))
-        .catch((error) => console.log(error));
+        .catch(error => res.status(400).json(error.errors.map(e => e.message)));
 };
 
-const getReader = (req, res) => {
+const getReader = (_, res) => {
     Reader.findAll()
         .then((list) => res.status(200).json(list))
         .catch((error) => console.log(error));

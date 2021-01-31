@@ -3,10 +3,10 @@ const { Book, Reader } = require('../models');
 const createBook = (req, res) => {
     Book.create(req.body)
         .then((book) => res.status(201).json(book))
-        .catch((error) => console.log(error));
+        .catch(error => res.status(400).json(error.errors.map(e => e.message)));
 };
 
-const getBooks = (req, res) => {
+const getBooks = (_, res) => {
     Book.findAll()
       .then((list) => res.status(200).json(list))
       .catch((error) => console.log(error));

@@ -26,6 +26,62 @@ describe('/books', () => {
                 expect(newBookRecord.genre).to.equal('Travel Writing');
                 expect(newBookRecord.ISBN).to.equal('34-58603-193842');
             });
+            it('returns a 400 if the title value is null', async () => {
+                request(app)
+                .post('/books')
+                .send({
+                    author: 'Bill Bryson',
+                    genre: 'Travel Writing',
+                    ISBN: '34-58603-193842',
+                })
+                .then((res) => {
+                  expect(res.status).to.equal(400);
+                  expect(res.body.error).to.equal('The title field cannot be null.');
+                })
+                .catch(error => done(error));
+              });
+              it('returns a 400 if the author value is null', async () => {
+                request(app)
+                .post('/readers')
+                .send({
+                    title: 'A Walk in the Woods',
+                    genre: 'Travel Writing',
+                    ISBN: '34-58603-193842',
+                })
+                .then((res) => {
+                  expect(res.status).to.equal(400);
+                  expect(res.body.error).to.equal('The author field cannot be null.');
+                })
+                .catch(error => done(error));
+              });
+              it('returns a 400 if the genre value is null', async () => {
+                request(app)
+                .post('/readers')
+                .send({
+                    title: 'A Walk in the Woods',
+                    author: 'Bill Bryson',
+                    ISBN: '34-58603-193842',
+                })
+                .then((res) => {
+                  expect(res.status).to.equal(400);
+                  expect(res.body.error).to.equal('The genre field cannot be null.');
+                })
+                .catch(error => done(error));
+              });
+              it('returns a 400 if the ISBN value is null', async () => {
+                request(app)
+                .post('/readers')
+                .send({
+                    title: 'A Walk in the Woods',
+                    author: 'Bill Bryson',
+                    genre: 'Travel Writing',
+                })
+                .then((res) => {
+                  expect(res.status).to.equal(400);
+                  expect(res.body.error).to.equal('The ISBN field cannot be null.');
+                })
+                .catch(error => done(error));
+              });
         });
     });
 

@@ -19,6 +19,13 @@ describe("/readers", () => {
       console.log(err);
     }
   });
+  afterEach(async () => {
+    try {
+      await Reader.destroy({ where: {} });
+    } catch (err) {
+      console.log(err);
+    }
+  })
 
   describe("POST /readers", async () => {
     it("creates a new reader in the database", async () => {
@@ -38,7 +45,74 @@ describe("/readers", () => {
       expect(insertedReaderRecords.email).to.equal("beverleyjames@iamanemail.com");
       expect(insertedReaderRecords.password).to.equal("iamasecretpassword2!");
     });
-    done(); // Is this needed?
+    it('returns a 400 if the name value is null', async () => {
+      request(app)
+      .post('/readers')
+      .send({
+        email: "beverleyjames@iamanemail.com",
+        password: "iamasecretpassword2!"
+      })
+      .then((res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body.error).to.equal('The name field cannot be null.');
+      })
+      .catch(error => done(error));
+    });
+    it('returns a 400 if the email value is null', async () => {
+      request(app)
+      .post('/readers')
+      .send({
+        name: "Beverley James",
+        password: "iamasecretpassword2!"
+      })
+      .then((res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body.error).to.equal('The email field cannot be null.');
+      })
+      .catch(error => done(error));
+    });
+    it('returns a 400 if the email is not a valid email format', async () => {
+      request(app)
+      .post('/readers')
+      .send({
+        name: "Beverley James",
+        email: "beverleyjamesiamanemail",
+        password: "iamasecretpassword2!"
+      })
+      .then((res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body.error).to.equal('The email is not a valid email format.');
+      })
+      .catch(error => done(error));
+    });
+    it('returns a 400 if the password value is null', async () => {
+      request(app)
+      .post('/readers')
+      .send({
+        name: "Beverley James",
+        email: "beverleyjames@iamanemail.com",
+      })
+      .then((res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body.error).to.equal('The password field cannot be null.');
+      })
+      .catch(error => done(error));
+    });
+    it('returns a 400 if the password value is less than 9 characters', async () => {
+      request(app)
+      .post('/readers')
+      .send({
+        name: "Beverley James",
+        email: "beverleyjames@iamanemail.com",
+        password: "iama",
+      })
+      .then((res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body.error).to.equal('The password must be at least 9 characters.');
+      })
+      .catch(error => done(error));
+    });
+    // done(); // Is this needed?
   });
 
   describe("with readers in the database", () => {
